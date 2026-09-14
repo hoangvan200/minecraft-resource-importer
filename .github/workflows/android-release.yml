@@ -14,6 +14,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,6 +30,13 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -37,7 +45,7 @@ jobs:
 
       - name: Build release APK
         working-directory: android
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleRelease --no-daemon --stacktrace --warning-mode all
 
       - name: Publish GitHub Release
         env:
