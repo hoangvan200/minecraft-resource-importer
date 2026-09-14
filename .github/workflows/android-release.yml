@@ -30,18 +30,18 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-          cache: gradle
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Generate Android project
         run: npx expo prebuild --platform android --non-interactive
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
 
       - name: Build release APK
         working-directory: android
