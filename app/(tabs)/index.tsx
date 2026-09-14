@@ -13,6 +13,8 @@ import {
 import { StatusBar } from "expo-status-bar";
 import * as DocumentPicker from "expo-document-picker";
 import * as IntentLauncher from "expo-intent-launcher";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { ScreenContainer } from "@/components/screen-container";
@@ -122,22 +124,43 @@ export default function HomeScreen() {
     if (!selectedFile || !canUsePicker) return;
 
     setIsImporting(true);
-    setFeedback("Opening Minecraft…");
+    setFeedback("Opening Android app chooser…");
     const mimeType = getMinecraftMimeType(selectedFile);
+    const safeName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const localUri = `${FileSystem.cacheDirectory}minecraft-import-${Date.now()}-${safeName}`;
 
     try {
       if (Platform.OS === "android") {
+        await FileSystem.copyAsync({ from: selectedFile.uri, to: localUri });
+        const shareAvailable = await Sharing.isAvailableAsync();
+        if (shareAvailable) {
+          await Sharing.shareAsync(localUri, {
+            mimeType: "application/octet-stream",
+            dialogTitle: "Open with Minecraft",
+          });
+        } else {
+          await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+            data: localUri,
+            type: mimeType,
+            flags: 1,
+          });
+        }
+        setFeedback("Choose Minecraft in the Android app chooser.");
+      } else {
+        await Linking.openURL(selectedFile.uri);
+        setFeedback("Package sent to Minecraft.");
+      }
+    } catch {
+      try {
         await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
-          data: selectedFile.uri,
+          data: localUri,
           type: mimeType,
           flags: 1,
         });
-      } else {
-        await Linking.openURL(selectedFile.uri);
+        setFeedback("Choose Minecraft in the Android app chooser.");
+      } catch {
+        setFeedback("Minecraft could not open this package. Try selecting Minecraft from the chooser.");
       }
-      setFeedback("Package sent to Minecraft.");
-    } catch {
-      setFeedback("Minecraft was not found or could not open this package.");
     } finally {
       setIsImporting(false);
     }
