@@ -14,7 +14,6 @@ import { StatusBar } from "expo-status-bar";
 import * as DocumentPicker from "expo-document-picker";
 import * as IntentLauncher from "expo-intent-launcher";
 import * as FileSystem from "expo-file-system/legacy";
-import * as Sharing from "expo-sharing";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { ScreenContainer } from "@/components/screen-container";
@@ -132,19 +131,12 @@ export default function HomeScreen() {
     try {
       if (Platform.OS === "android") {
         await FileSystem.copyAsync({ from: selectedFile.uri, to: localUri });
-        const shareAvailable = await Sharing.isAvailableAsync();
-        if (shareAvailable) {
-          await Sharing.shareAsync(localUri, {
-            mimeType: "application/octet-stream",
-            dialogTitle: "Open with Minecraft",
-          });
-        } else {
-          await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
-            data: localUri,
-            type: mimeType,
-            flags: 1,
-          });
-        }
+        const contentUri = await FileSystem.getContentUriAsync(localUri);
+        await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+          data: contentUri,
+          type: mimeType,
+          flags: 0x10000001,
+        });
         setFeedback("Choose Minecraft in the Android app chooser.");
       } else {
         await Linking.openURL(selectedFile.uri);
@@ -152,10 +144,11 @@ export default function HomeScreen() {
       }
     } catch {
       try {
+        const contentUri = await FileSystem.getContentUriAsync(localUri);
         await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
-          data: localUri,
+          data: contentUri,
           type: mimeType,
-          flags: 1,
+          flags: 0x10000001,
         });
         setFeedback("Choose Minecraft in the Android app chooser.");
       } catch {
