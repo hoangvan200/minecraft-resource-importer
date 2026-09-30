@@ -14,10 +14,109 @@ import { StatusBar } from "expo-status-bar";
 import * as DocumentPicker from "expo-document-picker";
 import * as IntentLauncher from "expo-intent-launcher";
 import * as FileSystem from "expo-file-system/legacy";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { ScreenContainer } from "@/components/screen-container";
-import { getMinecraftMimeType, hasSupportedExtension, supportedExtensions } from "@/lib/minecraft-package";
+import { getMinecraftMimeType, hasSupportedExtension } from "@/lib/minecraft-package";
+
+function MinecraftIcon({
+  name,
+  size,
+  color,
+}: {
+  name: "lock-outline" | "description" | "file-upload";
+  size: number;
+  color: string;
+}) {
+  const position = (left: number, top: number, width: number, height: number) => ({
+    position: "absolute" as const,
+    left: size * left,
+    top: size * top,
+    width: size * width,
+    height: size * height,
+  });
+
+  if (name === "lock-outline") {
+    return (
+      <View style={{ width: size, height: size }} accessibilityElementsHidden>
+        <View
+          style={{
+            ...position(0.31, 0.12, 0.38, 0.42),
+            borderWidth: Math.max(1, size * 0.075),
+            borderBottomWidth: 0,
+            borderColor: color,
+            borderTopLeftRadius: size * 0.2,
+            borderTopRightRadius: size * 0.2,
+          }}
+        />
+        <View
+          style={{
+            ...position(0.2, 0.42, 0.6, 0.48),
+            borderWidth: Math.max(1, size * 0.075),
+            borderColor: color,
+            borderRadius: size * 0.07,
+          }}
+        />
+        <View
+          style={{
+            ...position(0.46, 0.58, 0.08, 0.08),
+            backgroundColor: color,
+            borderRadius: size,
+          }}
+        />
+      </View>
+    );
+  }
+
+  if (name === "description") {
+    return (
+      <View
+        style={{
+          width: size * 0.62,
+          height: size * 0.78,
+          marginHorizontal: size * 0.19,
+          borderColor: color,
+          borderWidth: Math.max(1, size * 0.045),
+          borderRadius: size * 0.04,
+          justifyContent: "center",
+          paddingHorizontal: size * 0.1,
+          gap: size * 0.09,
+        }}
+        accessibilityElementsHidden
+      >
+        <View style={{ height: size * 0.045, backgroundColor: color }} />
+        <View style={{ height: size * 0.045, backgroundColor: color }} />
+        <View style={{ height: size * 0.045, width: "70%", backgroundColor: color }} />
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ width: size, height: size }} accessibilityElementsHidden>
+      <View
+        style={{
+          ...position(0.38, 0.28, 0.24, 0.42),
+          backgroundColor: color,
+          borderRadius: size * 0.03,
+        }}
+      />
+      <View
+        style={{
+          ...position(0.32, 0.08, 0.36, 0.16),
+          borderLeftWidth: size * 0.18,
+          borderRightWidth: size * 0.18,
+          borderBottomWidth: size * 0.17,
+          borderLeftColor: "transparent",
+          borderRightColor: "transparent",
+          borderBottomColor: color,
+        }}
+      />
+      <View style={{ ...position(0.2, 0.7, 0.6, 0.08), backgroundColor: color }} />
+      <View style={{ ...position(0.2, 0.7, 0.08, 0.16), backgroundColor: color }} />
+      <View style={{ ...position(0.72, 0.7, 0.08, 0.16), backgroundColor: color }} />
+      <View style={{ ...position(0.2, 0.78, 0.6, 0.08), backgroundColor: color }} />
+    </View>
+  );
+}
 
 const pickerTypes = [
   "application/zip",
@@ -173,7 +272,7 @@ export default function HomeScreen() {
 
         {permissionState === "denied" ? (
           <View style={styles.permissionCard}>
-            <MaterialIcons name="lock-outline" size={20} color="#f4c76b" />
+            <MinecraftIcon name="lock-outline" size={20} color="#f4c76b" />
             <View style={styles.permissionCopy}>
               <Text style={styles.permissionTitle}>Storage access needed</Text>
               <Text style={styles.permissionMessage}>Allow file access to continue.</Text>
@@ -198,7 +297,7 @@ export default function HomeScreen() {
         >
           <View style={styles.dropZoneContent}>
             <View style={styles.uploadRow}>
-              <MaterialIcons name={selectedFile ? "description" : "file-upload"} size={92} color="#a5a5a5" />
+              <MinecraftIcon name={selectedFile ? "description" : "file-upload"} size={92} color="#a5a5a5" />
               <Text style={styles.chooseText}>{selectedFile ? "File selected" : "Choose file"}</Text>
             </View>
             <Text style={styles.supportedLabel}>{borderText}</Text>

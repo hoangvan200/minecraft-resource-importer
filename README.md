@@ -67,6 +67,8 @@ The repository includes the `Android APK Release` GitHub Actions workflow. It pe
 5. Builds the release APK with Gradle stack traces enabled.
 6. Creates a GitHub Release and uploads the generated APK.
 
+The release variant enables R8 code minification and Android resource shrinking. Both `armeabi-v7a` and `arm64-v8a` remain enabled so the APK continues to support 32-bit and 64-bit ARM devices.
+
 To run the workflow manually:
 
 1. Open the repository's **Actions** tab.
